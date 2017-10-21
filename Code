@@ -1,0 +1,27 @@
+data <-read.csv("arrivals_treemap.csv")
+data$Visitors <- as.numeric(data$Visitors)
+require(devtools)
+require(ggplot2)
+require(treemapify)
+require(extrafont)
+
+treemap_coords <- treemapify(data,
+                             area="Visitors",
+                             fill="Region",
+                             label = "Country",
+                             group = "Region")
+
+print(treemap_coords)
+
+ggplot2::ggplot(data, ggplot2:: aes(area=Visitors,
+                           fill=Region,
+                           label=Country,
+                           group=Region)) + 
+  geom_treemap()+
+  geom_treemap_text()+
+  scale_fill_brewer(palette = "Set1")+
+  ggtitle("Table X: Visitors to Aruba according to source market")+
+  theme_gray(base_family = "Candara")+
+  theme(plot.title = element_text(face="bold", 
+                                  size=26, 
+                                  hjust=0))
