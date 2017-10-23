@@ -25,3 +25,43 @@ ggplot2::ggplot(data, ggplot2:: aes(area=Visitors,
   theme(plot.title = element_text(face="bold", 
                                   size=26, 
                                   hjust=0))
+# Total services trade
+require(ggplot2)
+require(dplyr)
+
+mydt <- read.csv("Georgia.csv", header=T)
+head(mydt)
+levels(mydt$variable)
+ser.dt <- mydt %>%
+  filter(variable=="Total Services Trade")
+
+Balance <- ser.dt%>%
+  group_by(year)%>%
+  summarise(value=-diff(value))
+
+Balance <- cbind(variable=c(rep("Total Services Trade", 13)),
+                 type= c(rep("Balance", 13)), Balance, geo=c(rep("NA", 13)))
+
+mydata <- rbind(ser.dt, Balance)
+
+base <- mydata %>%
+  filter(type != "Balance") %>%
+  mutate(
+    value = ifelse(type == "Exports", value, -value)
+  )
+balance <- mydata %>%
+  filter(type == "Balance")
+
+ggplot(balance, aes(x = year, y = value)) +
+  geom_bar(data = base, aes(fill = type), stat = "identity") +
+  geom_point(aes(colour = type)) +
+  geom_line(aes(colour = type, group=1)) +
+  scale_fill_manual(values = c(Exports = "#D55E00", Imports = "#E69F00"), name="") +
+  scale_colour_manual(values = c(Balance = "#660000"), name="") +
+  labs(x = "", y = "Total Services Trade")+
+  theme_bw()
+
+## WTTC data
+wttc <- read.csv("WTTC.csv")
+myts <- ts(wttc, start=c(2010, 1), end=c(2017, 1), frequency=1) 
+
